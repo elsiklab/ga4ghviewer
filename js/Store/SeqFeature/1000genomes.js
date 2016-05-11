@@ -16,18 +16,16 @@ define( [
 return declare(SeqFeature, {
 
     constructor: function(args) {
-        console.log(args);
-        console.log(this.config);
     },
 
     getFeatures: function(query, featureCallback, finishCallback, errorCallback) {
-        console.log(query);
+        var ref = query.ref.replace(/chr/,"");
         var variantSet = {
             variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInJlbGVhc2UiXQ",
             start: query.start,
             end: query.end,
-            referenceName: "1",
-            callSetIds: [],//this.config.callset,
+            referenceName: ref,
+            callSetIds: this.config.callset||[],
             pageSize: 50
         };
 
@@ -37,6 +35,7 @@ return declare(SeqFeature, {
             headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
             handleAs: "json"
         }).then(function(res) {
+            console.log(res);
             array.forEach(res.variants, function(variant) {
                 featureCallback(new SimpleFeature({
                     id: variant.id,
