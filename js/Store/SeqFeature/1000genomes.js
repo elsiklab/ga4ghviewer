@@ -29,30 +29,41 @@ return declare(SeqFeature, {
             pageSize: 50
         };
 
-        return request("http://1kgenomes.ga4gh.org/variants/search", {
-            data : JSON.stringify(variantSet),
-            method : 'post',
-            headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
-            handleAs: "json"
-        }).then(function(res) {
-            console.log(res);
-            array.forEach(res.variants, function(variant) {
-                featureCallback(new SimpleFeature({
-                    id: variant.id,
-                    data: {
-                        start: variant.start,
-                        end: variant.end,
-                        name: variant.id,
-                        info: variant.info
-                    }
-                }));
-            });
-            finishCallback();
-        }, function(err) {
-            console.error(err);
-            errorCallback("Error contacting GA4GH");
-        });
+        function fetch(data) {
 
+            return request("http://1kgenomes.ga4gh.org/variants/search", {
+                data : JSON.stringify(data),
+                method : 'post',
+                headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
+                handleAs: "json"
+            }).then(function(res) {
+                console.log(res);
+
+                
+                array.forEach(res.variants, function(variant) {
+                    featureCallback(new SimpleFeature({
+                        id: variant.id,
+                        data: {
+                            start: variant.start,
+                            end: variant.end,
+                            name: variant.id,
+                            info: variant.info
+                        }
+                    }));
+                });
+                if(res.nextPageToken) {
+                    fetch(dojo.mixin(data,{pageToken: res.nextPageToken}));
+                }
+                else {
+                    finishCallback();
+                }
+            }, function(err) {
+                console.error(err);
+                errorCallback("Error contacting GA4GH");
+            });
+        }
+
+        fetch(variantSet);
     }
 
 });
