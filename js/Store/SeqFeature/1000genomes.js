@@ -37,7 +37,6 @@ return declare(SeqFeature, {
                 headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
                 handleAs: "json"
             }).then(function(res) {
-                console.log(res);
 
                 
                 array.forEach(res.variants, function(variant) {
