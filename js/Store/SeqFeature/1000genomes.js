@@ -16,7 +16,7 @@ function(
         getFeatures: function(query, featureCallback, finishCallback, errorCallback) {
             var ref = query.ref.replace(/chr/, '');
             var variantSet = {
-                variantSetId: 'WyIxa2dlbm9tZXMiLCJ2cyIsInJlbGVhc2UiXQ',
+                variantSetId: this.config.functional ? 'WyIxa2dlbm9tZXMiLCJ2cyIsImZ1bmN0aW9uYWwtYW5ub3RhdGlvbiJd' : 'WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0',
                 start: query.start,
                 end: query.end,
                 referenceName: ref,
