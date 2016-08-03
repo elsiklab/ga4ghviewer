@@ -1,6 +1,7 @@
 define([
     'dojo/_base/declare',
     'dojo/_base/array',
+    'dojo/_base/lang',
     'dojo/request',
     'JBrowse/Store/SeqFeature',
     'JBrowse/Model/SimpleFeature'
@@ -8,6 +9,7 @@ define([
 function(
     declare,
     array,
+    lang,
     request,
     SeqFeature,
     SimpleFeature
@@ -32,13 +34,25 @@ function(
                     handleAs: 'json'
                 }).then(function(res) {
                     array.forEach(res.variants, function(variant) {
+                        variant.genotypes = {};
+                        for (var i = 0; i < variant.calls.length; i++) {
+                            variant.genotypes[variant.calls[i].callSetName] = {
+                                GT: {
+                                    values: [
+                                        variant.calls[i].genotype.join('/')
+                                    ]
+                                }
+                            };
+                        }
                         featureCallback(new SimpleFeature({
                             id: variant.id,
                             data: {
-                                start: variant.start,
-                                end: variant.end,
+                                start: +variant.start,
+                                end: +variant.end,
                                 name: variant.id,
-                                info: variant.info
+                                info: variant.info,
+                                genotypes: variant.genotypes,
+                                type: 'SNV'
                             }
                         }));
                     });
