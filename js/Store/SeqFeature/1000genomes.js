@@ -16,6 +16,7 @@ function(
 ) {
     return declare(SeqFeature, {
         getFeatures: function(query, featureCallback, finishCallback, errorCallback) {
+            var thisB = this;
             var ref = query.ref.replace(/chr/, '');
             var variantSet = {
                 variantSetId: this.config.functional ? 'WyIxa2dlbm9tZXMiLCJ2cyIsImZ1bmN0aW9uYWwtYW5ub3RhdGlvbiJd' : 'WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0',
@@ -27,7 +28,7 @@ function(
             };
 
             function fetch(data) {
-                return request('http://1kgenomes.ga4gh.org/variants/search', {
+                return request(thisB.config.urlTemplate, {
                     data: JSON.stringify(data),
                     method: 'post',
                     headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
