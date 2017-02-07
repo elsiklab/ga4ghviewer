@@ -2,6 +2,7 @@ define([
     'dojo/_base/declare',
     'dojo/_base/array',
     'dojo/_base/lang',
+    'dojo/promise/all',
     'dojo/request',
     'JBrowse/Store/SeqFeature',
     'JBrowse/Model/SimpleFeature'
@@ -10,6 +11,7 @@ function(
     declare,
     array,
     lang,
+    all,
     request,
     SeqFeature,
     SimpleFeature
@@ -28,7 +30,7 @@ function(
             };
 
             function fetch(data) {
-                return request(thisB.config.urlTemplate, {
+                return request(thisB.config.urlTemplate+'/variants/search', {
                     data: JSON.stringify(data),
                     method: 'post',
                     headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
@@ -68,6 +70,23 @@ function(
                 });
             }
             fetch(variantSet);
+        },
+        getVCFHeader: function() {
+            var thisB = this;
+            
+            var ret = array.map(this.config.callset, function(elt) {
+                return request(thisB.config.urlTemplate+'/callsets/'+elt, {
+                    headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
+                    handleAs: 'json'
+                });
+            });
+            return all(ret).then(function(here) {
+                return {
+                    samples: array.map(here, function(elt) {
+                        return elt.name;
+                    })
+                };
+            });
         }
     });
 });

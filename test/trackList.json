@@ -6,14 +6,14 @@
    "tracks" : [
       {
          "type": "CanvasFeatures",
-         "urlTemplate": "http://1kgenomes.ga4gh.org/variants/search",
+         "urlTemplate": "http://1kgenomes.ga4gh.org/",
          "storeClass": "GA4GHViewer/Store/SeqFeature/1000genomes",
          "label": "GA4GH 1kg (phase3)",
          "callSetIds":[]
       },
       {
          "type": "CanvasFeatures",
-         "urlTemplate": "http://1kgenomes.ga4gh.org/variants/search",
+         "urlTemplate": "http://1kgenomes.ga4gh.org/",
          "storeClass": "GA4GHViewer/Store/SeqFeature/1000genomes",
          "label": "GA4GH 1kg (functional annot)",
          "functional": true,
