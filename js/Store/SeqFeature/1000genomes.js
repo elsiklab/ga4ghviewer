@@ -2,7 +2,6 @@ define([
     'dojo/_base/declare',
     'dojo/_base/array',
     'dojo/_base/lang',
-    'dojo/promise/all',
     'dojo/request',
     'JBrowse/Store/SeqFeature',
     'JBrowse/Model/SimpleFeature'
@@ -11,7 +10,6 @@ function(
     declare,
     array,
     lang,
-    all,
     request,
     SeqFeature,
     SimpleFeature
@@ -21,12 +19,12 @@ function(
             var thisB = this;
             var ref = query.ref.replace(/chr/, '');
             var variantSet = {
-                variantSetId: this.config.functional ? 'WyIxa2dlbm9tZXMiLCJ2cyIsImZ1bmN0aW9uYWwtYW5ub3RhdGlvbiJd' : 'WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0',
+                variantSetId: this.config.variantSetId,
                 start: query.start,
                 end: query.end,
                 referenceName: ref,
-                callSetIds: this.config.callset || [],
-                pageSize: 50
+                callSetIds: this.config.callSetIds || [],
+                pageSize: 100
             };
 
             function fetch(data) {
@@ -38,6 +36,7 @@ function(
                 }).then(function(res) {
                     array.forEach(res.variants, function(variant) {
                         variant.genotypes = {};
+
                         for (var i = 0; i < variant.calls.length; i++) {
                             variant.genotypes[variant.calls[i].callSetName] = {
                                 GT: {
@@ -47,6 +46,14 @@ function(
                                 }
                             };
                         }
+                        array.forEach(Object.keys(variant.info), function(elt) {
+                            if(!variant.info[elt][0]) {
+                                delete variant.info[elt];
+                            } else {
+                                variant.info[elt] = variant.info[elt][0];
+                            }
+                        });
+
                         featureCallback(new SimpleFeature({
                             id: variant.id,
                             data: {
@@ -60,12 +67,11 @@ function(
                         }));
                     });
                     if (res.nextPageToken) {
-                        fetch(dojo.mixin(data, {pageToken: res.nextPageToken}));
+                        fetch(lang.mixin(data, { pageToken: res.nextPageToken }));
                     } else {
                         finishCallback();
                     }
                 }, function(err) {
-                    console.error(err);
                     errorCallback('Error contacting GA4GH');
                 });
             }
@@ -74,19 +80,33 @@ function(
         getVCFHeader: function() {
             var thisB = this;
             
-            var ret = array.map(this.config.callset, function(elt) {
-                return request(thisB.config.urlTemplate+'/callsets/'+elt, {
+            var init = {
+                variantSetId: this.config.variantSetId,
+                callSetIds: this.config.callSetIds,
+                pageSize: 5000
+            };
+            var callset = [];
+
+            function fetch(data) {
+                return request(thisB.config.urlTemplate+'/callsets/search', {
                     headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
-                    handleAs: 'json'
+                    data: JSON.stringify(data),
+                    handleAs: 'json',
+                    method: 'post'
+                }).then(function(res) {
+                    var r = array.map(res.callSets, function(elt) { return elt.name; });
+                    callset = callset.concat(r);
+                    if (res.nextPageToken) {
+                        return fetch(lang.mixin(data, { pageToken: res.nextPageToken }));
+                    } else {
+                        return {samples: callset};
+                    }
+                }, function(err) {
+                    console.error(err);
+                    return {error: 'Error contacting GA4GH'};
                 });
-            });
-            return all(ret).then(function(here) {
-                return {
-                    samples: array.map(here, function(elt) {
-                        return elt.name;
-                    })
-                };
-            });
+            }
+            return fetch(init);
         }
     });
 });
