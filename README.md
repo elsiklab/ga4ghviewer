@@ -1,7 +1,7 @@
 # GA4GHViewer
 
 
-A JBrowse plugin for viewing data from the GA4GH APIs at https://rest.ensembl.org
+A JBrowse plugin for viewing data from the GA4GH APIs
 
 
 ## Config variables
@@ -13,7 +13,13 @@ A JBrowse plugin for viewing data from the GA4GH APIs at https://rest.ensembl.or
 
 ## Example config
 
-See test/human and test/data for sample datasets
+See test/human (https://rest.ensembl.org ga4gh endpoints) and test/data (google genomes GA4GH API) for sample datasets
+
+## APIs supported
+
+- Has support for the /variants GA4GH API to get variants in region
+- Can also look at /callsets GA4GH API to get set of samples in a variant set
+
 
 ## Demo
 
