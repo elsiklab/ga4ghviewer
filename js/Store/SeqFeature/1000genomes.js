@@ -19,16 +19,20 @@ function(
             var thisB = this;
             var ref = query.ref.replace(/chr/, '');
             var variantSet = {
-                variantSetId: this.config.variantSetId,
                 start: query.start,
                 end: query.end,
                 referenceName: ref,
                 callSetIds: this.config.callSetIds || [],
                 pageSize: 100
             };
+            if(this.config.google) {
+                variantSet.variantSetIds = [this.config.variantSetId];
+            } else {
+                variantSet.variantSetId = this.config.variantSetId;
+            }
 
             function fetch(data) {
-                return request(thisB.config.urlTemplate+'/variants/search', {
+                return request(thisB.config.urlTemplate+'/variants/search'+(thisB.config.apiKey||''), {
                     data: JSON.stringify(data),
                     method: 'post',
                     headers: { 'X-Requested-With': null, 'Content-Type': 'application/json' },
